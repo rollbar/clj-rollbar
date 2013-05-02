@@ -10,7 +10,7 @@ Work in progress.
 (require 'clj-rollbar.core)
 
 ; exceptions
-(try ("nofn") (catch Exception e (clj-rollbar.core/report-message "access-token-here" "environment-name" e)))
+(try ("nofn") (catch Exception e (clj-rollbar.core/report-exception "access-token-here" "environment-name" e)))
 
 ; log messages
 (clj-rollbar.core/report-message "access-token-here" "environment-name" "Something critical happened" "critical")
