@@ -46,6 +46,41 @@
         }
       }}))))
 
+(def ^:private shim-name "shim-frame.clj")
+
+(defn- get-shim-frames
+  [parsed-exception]
+  [ { :lineno 0
+      :filename shim-name
+      :method "causedBy"
+    }
+    {
+      :lineno 0
+      :filename shim-name
+      :method (str (:class parsed-exception))
+    }])
+
+(defn- project-frame
+  [stackframe]
+  (let [{:keys [file line], :as elem} stackframe] 
+    {
+      :lineno line 
+      :filename file 
+      :method (method-str elem)
+    }))
+
+(defn- project-exception-to-frames 
+  [parsed-exception]
+  (vec (map project-frame (:trace-elems parsed-exception))))
+
+(defn- build-frames-with-causes
+  [parsed-exception]
+  (loop [cur-exception parsed-exception 
+         frames []]
+    (if (:cause cur-exception)
+      (recur (:cause parsed-exception) 
+             (concat frames (project-exception-to-frames cur-exception) (get-shim-frames parsed-exception)))
+      (concat frames (project-exception-to-frames cur-exception)))))
 
 (defn- build-trace
   [parsed-exception]
@@ -54,12 +89,8 @@
       :class (first (split (str (get parsed-exception :class)) #":"))
       :message (get parsed-exception :message)
     }
-    :frames (for [{:keys [file line], :as elem} (get parsed-exception :trace-elems)]
-                 {:lineno line 
-                   :filename file 
-                   :method (method-str elem)})
+    :frames (build-frames-with-causes parsed-exception)
   })
-
     
 (defn report-exception
   "Reports an exception at the 'error' level"
