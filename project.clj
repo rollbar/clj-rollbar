@@ -1,4 +1,4 @@
-(defproject clj-rollbar "0.0.2"
+(defproject clj-rollbar "0.0.3"
   :description "Rollbar API client"
   :dependencies [[org.clojure/clojure "1.3.0"]
                  [org.clojure/data.json "0.2.1"]
