@@ -123,9 +123,11 @@
 (defn report-exception
   "Reports an exception at the 'error' level"
   [access-token environment exception & {:keys [request user-id]}]
-  (let [data-map (base-data environment "error")
-        trace-map {:body {:trace (build-trace
-                                  (parse-exception exception))}}
-        request-map (if request (request-data request user-id) {})
-        data-maps [data-map trace-map request-map]]
-    (send-payload (build-payload access-token data-maps))))
+  (if (empty? access-token)
+    (.printStackTrace exception)
+    (let [data-map (base-data environment "error")
+          trace-map {:body {:trace (build-trace
+                                    (parse-exception exception))}}
+          request-map (if request (request-data request user-id) {})
+          data-maps [data-map trace-map request-map]]
+      (send-payload (build-payload access-token data-maps)))))
